@@ -2,12 +2,13 @@ import networkx as nx
 import numpy as np
 
 from mindquantum import Hamiltonian, QubitOperator, MQAnsatzOnlyLayer
-from mindquantum import X, Z, RY, HardwareEfficientAnsatz
+from mindquantum import X, Z, RY
 from mindquantum import Circuit, Simulator
 
-from mindspore import nn, ops, Tensor
+from mindspore import nn, ops
 import mindspore as ms
 ms.context.set_context(mode=ms.context.PYNATIVE_MODE, device_target="CPU")
+ms.set_seed(2022)
 import os
 os.environ["OMP_NUM_THREADS"] = "4"
 
@@ -151,11 +152,11 @@ def MBEMaxCut(logits, g):
 if __name__ == "__main__":
     num_nodes = 10
     depth = 13
+    EPOCH = 2000
     while True:
         g = gene_graph(num_nodes, 0.3)
         if num_nodes == len(g.nodes):
             break
-
     print("nodes number: ", len(g.nodes), "nodes: ", g.nodes)
     print("edges number: ", len(g.edges), "deges: ", g.edges)
     MaxCutG = get_max_cut(g)
@@ -175,7 +176,7 @@ if __name__ == "__main__":
     forward_with_loss = ForwardWithLoss(net, loss_func)
     train_one_step = TrainOneStep(forward_with_loss, optimier)
     max_cut = 0
-    for i in range(10000):
+    for i in range(EPOCH):
         train_one_step()
         if (i+1) % 100 == 0:
             logits = net()
@@ -185,5 +186,5 @@ if __name__ == "__main__":
         if int(max_cut) == MaxCutG:
             print("total training step:", i+1)
             break  
-    if max_cut != MaxCutG and (i+1) == 10000:
+    if max_cut != MaxCutG and (i+1) == EPOCH:
         print("Answer Not Found.")
